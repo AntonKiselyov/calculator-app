@@ -1,5 +1,6 @@
 package ru.akiselev.calculator.service.service;
 
+import com.google.common.base.Preconditions;
 import com.google.inject.Singleton;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -20,6 +21,7 @@ import static org.apache.commons.lang3.StringUtils.isNumeric;
 
 @Singleton
 public class ExpressionService {
+
     public Operand buildExpression(final String expression) {
         final CalculatorLexer lexer = new CalculatorLexer(CharStreams.fromString(expression));
         final CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -29,9 +31,7 @@ public class ExpressionService {
     }
 
     private Operand parse(final ParseTree node) {
-        if (node == null) {
-            return Expr.empty();
-        }
+        Preconditions.checkNotNull(node);
         if (node instanceof MinusContext) {
 
             final Operand leftOp = parse(node.getChild(0));
@@ -69,10 +69,13 @@ public class ExpressionService {
         } else if (node instanceof OperandContext) {
 
             final String val = node.getChild(0).toString();
-            return isNumeric(val)
-                    ? Expr.number(Double.parseDouble(val))
-                    : Expr.variable(val);
-
+            final Operand operand;
+            if (isNumeric(val)) {
+                operand = Expr.number(Double.parseDouble(val));
+            } else {
+                operand = Expr.variable(val);
+            }
+            return operand;
         }
         return Expr.empty();
     }
