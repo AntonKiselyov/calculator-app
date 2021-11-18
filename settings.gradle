@@ -1,0 +1,4 @@
+rootProject.name = 'calculator-app'
+include 'calculator-service'
+include 'calculator-client'
+

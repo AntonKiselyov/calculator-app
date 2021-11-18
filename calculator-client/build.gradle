@@ -1,0 +1,18 @@
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation group: 'com.google.inject', name: 'guice', version: googleGuiceVersion
+    implementation group: 'ru.vyarus', name: 'dropwizard-guicey', version: dropwizardGuiceVersion
+    implementation group: 'com.netflix.feign', name: 'feign-core', version: feignVersion
+    implementation group: 'com.netflix.feign', name: 'feign-jackson', version: feignVersion
+    implementation group: 'com.netflix.feign', name: 'feign-jaxrs', version: feignVersion
+    implementation group: 'com.netflix.feign', name: 'feign-okhttp', version: feignVersion
+    implementation group: 'com.netflix.feign', name: 'feign-slf4j', version: feignVersion
+    implementation group: 'io.dropwizard', name: 'dropwizard-core', version: dropwizardVersion
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+    implementation group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: javaxRsApiVersion
+    implementation group: 'commons-io', name: 'commons-io', version: commonsIOVersion
+}

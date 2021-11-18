@@ -1,0 +1,12 @@
+apply plugin: 'antlr'
+
+dependencies {
+    implementation group: 'com.google.inject', name: 'guice', version: googleGuiceVersion
+    implementation group: 'ru.vyarus', name: 'dropwizard-guicey', version: dropwizardGuiceVersion
+    implementation group: 'io.dropwizard', name: 'dropwizard-core', version: dropwizardVersion
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+    antlr group: 'org.antlr', name: 'antlr4', version: antlrVersion
+}
+
+compileJava.dependsOn(generateGrammarSource)
