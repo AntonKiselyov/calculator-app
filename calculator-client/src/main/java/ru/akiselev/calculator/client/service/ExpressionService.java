@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import ru.akiselev.calculator.client.client.ExpressionClient;
 import ru.akiselev.calculator.client.client.dto.Operand;
 import ru.akiselev.calculator.client.dto.ExpressionRequest;
@@ -12,6 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static java.lang.String.format;
+
+@Slf4j
 @Singleton
 @AllArgsConstructor(onConstructor = @__({@Inject}))
 public class ExpressionService {
@@ -22,7 +26,7 @@ public class ExpressionService {
         Preconditions.checkNotNull(request, "Expression request can't be null.");
         Preconditions.checkNotNull(request.getExpression(), "Expression can't be null.");
         final Operand expr = expressionClient.buildExpression(request.getExpression());
-        System.out.println(expr);
+        log.info(format("Expression: %s", expr));
         return substituteVariables(expr, request.getParams()).evaluate();
     }
 

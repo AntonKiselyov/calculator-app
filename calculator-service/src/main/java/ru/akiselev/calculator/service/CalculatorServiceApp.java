@@ -4,6 +4,7 @@ import io.dropwizard.Application;
 import io.dropwizard.configuration.ResourceConfigurationSourceProvider;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import ru.akiselev.calculator.service.healthcheck.AppHealthCheck;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
 
 public class CalculatorServiceApp extends Application<CalculatorServiceConfiguration> {
@@ -14,6 +15,7 @@ public class CalculatorServiceApp extends Application<CalculatorServiceConfigura
 
     @Override
     public void run(final CalculatorServiceConfiguration configuration, final Environment environment) {
+        environment.healthChecks().register("AppHealthCheck", new AppHealthCheck());
     }
 
     @Override
