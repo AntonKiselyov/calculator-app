@@ -1,12 +1,10 @@
 package ru.akiselev.calculator.service;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 import io.dropwizard.Application;
 import io.dropwizard.configuration.ResourceConfigurationSourceProvider;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import ru.akiselev.calculator.service.resource.ExpressionResource;
+import ru.vyarus.dropwizard.guice.GuiceBundle;
 
 public class CalculatorServiceApp extends Application<CalculatorServiceConfiguration> {
 
@@ -16,8 +14,6 @@ public class CalculatorServiceApp extends Application<CalculatorServiceConfigura
 
     @Override
     public void run(final CalculatorServiceConfiguration configuration, final Environment environment) {
-        final Injector injector = Guice.createInjector(new CalculatorServiceModule(configuration, environment));
-        environment.jersey().register(injector.getInstance(ExpressionResource.class));
     }
 
     @Override
@@ -27,7 +23,10 @@ public class CalculatorServiceApp extends Application<CalculatorServiceConfigura
 
     @Override
     public void initialize(final Bootstrap<CalculatorServiceConfiguration> bootstrap) {
+        bootstrap.addBundle(GuiceBundle.builder()
+                        .enableAutoConfig(getClass().getPackage().getName())
+                        .modules(new CalculatorServiceModule())
+                .build());
         bootstrap.setConfigurationSourceProvider(new ResourceConfigurationSourceProvider());
-        super.initialize(bootstrap);
     }
 }
