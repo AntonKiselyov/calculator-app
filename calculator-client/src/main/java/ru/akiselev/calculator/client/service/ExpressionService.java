@@ -8,7 +8,9 @@ import ru.akiselev.calculator.client.client.ExpressionClient;
 import ru.akiselev.calculator.client.client.dto.Operand;
 import ru.akiselev.calculator.client.dto.ExpressionRequest;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Singleton
 @AllArgsConstructor(onConstructor = @__({@Inject}))
@@ -21,26 +23,41 @@ public class ExpressionService {
         Preconditions.checkNotNull(request.getExpression(), "Expression can't be null.");
         final Operand expr = expressionClient.buildExpression(request.getExpression());
         System.out.println(expr);
-        applyParamsToVariables(expr, request.getParams());
-        return expr.evaluate();
+        return substituteVariables(expr, request.getParams()).evaluate();
     }
 
-    private void applyParamsToVariables(final Operand operand, final Map<String, Double> params) {
+    private Operand substituteVariables(final Operand operand, final Map<String, Double> params) {
         Preconditions.checkNotNull(params, "Parameters can't be null.");
         Preconditions.checkNotNull(operand, "Expression can't be null");
-        if (operand instanceof Operand.Variable) {
+
+        if (operand instanceof Operand.Expr) {
+            final Operand.Expr expr = (Operand.Expr) operand;
+
+            final List<Operand> args = expr.args()
+                    .stream()
+                    .map(arg -> substituteVariables(arg, params))
+                    .collect(Collectors.toList());
+
+            if (expr instanceof Operand.BinaryExpr) {
+
+                final Operand.BinaryExpr binaryExpr = (Operand.BinaryExpr) expr;
+                return Operand.binary(binaryExpr.symbol(), binaryExpr.getOperator(), args);
+
+            } else if (expr instanceof Operand.UnaryExpr) {
+
+                final Operand.UnaryExpr unaryExpr = (Operand.UnaryExpr) expr;
+                return Operand.unary(unaryExpr.symbol(), unaryExpr.getOperator(), args);
+
+            }
+        } else if (operand instanceof Operand.Variable) {
+
             final Operand.Variable variable = (Operand.Variable) operand;
-            if (params.containsKey(variable.getVal())) {
-                final Double substitute = params.get(variable.getVal());
-                variable.applySubstitute(substitute);
+            if (params.containsKey(variable.getVar())) {
+                return Operand.number(params.get(variable.getVar()));
             }
-        } else if (operand instanceof Operand.Expr) {
-            final Operand.Expr e = (Operand.Expr) operand;
-            if (e.args() != null) {
-                for (final Operand arg : e.args()) {
-                    applyParamsToVariables(arg, params);
-                }
-            }
+            return operand;
+
         }
+        return operand;
     }
 }

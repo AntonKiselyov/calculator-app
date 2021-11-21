@@ -11,11 +11,12 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static ru.akiselev.calculator.client.utils.DoubleUtils.isDouble;
 
 public class OperandDecoder implements Decoder {
 
     private static final String VAL = "val";
+    private static final String VAR = "var";
+    private static final String SYMBOL = "symbol";
     private static final String ARGS = "args";
     private static final String PLUS = "+";
     private static final String MINUS = "-";
@@ -31,40 +32,40 @@ public class OperandDecoder implements Decoder {
     }
 
     private Operand parse(final JsonNode node) {
-        if (node.has(VAL) && node.has(ARGS)) {
-            final JsonNode val = node.get(VAL);
+        if (node.has(SYMBOL) && node.has(ARGS)) {
+            final JsonNode val = node.get(SYMBOL);
             final JsonNode args = node.get(ARGS);
 
-            final List<Operand> exprs = newArrayList();
+            final List<Operand> operands = newArrayList();
             args.elements().forEachRemaining(e -> {
-                final Operand expr = parse(e);
-                exprs.add(expr);
+                final Operand operand = parse(e);
+                operands.add(operand);
             });
 
             final String operator = val.asText();
             if (PLUS.equals(operator)) {
 
-                return Operand.binary(PLUS, (a, b) -> a + b, exprs.toArray(new Operand[0]));
+                return Operand.binary(PLUS, (a, b) -> a + b, operands);
 
             } else if (MINUS.equals(operator)) {
 
-                return Operand.binary(MINUS, (a, b) -> a - b, exprs.toArray(new Operand[0]));
+                return Operand.binary(MINUS, (a, b) -> a - b, operands);
 
             } else if (MUL.equals(operator)) {
 
-                return Operand.binary(MUL, (a, b) -> a * b, exprs.toArray(new Operand[0]));
+                return Operand.binary(MUL, (a, b) -> a * b, operands);
 
             } else if (DIV.equals(operator)) {
 
-                return Operand.binary(DIV, (a, b) -> a / b, exprs.toArray(new Operand[0]));
+                return Operand.binary(DIV, (a, b) -> a / b, operands);
 
             } else if (BRACKETS.equals(operator)) {
 
-                return Operand.unary(BRACKETS, a -> a, exprs.toArray(new Operand[0]));
+                return Operand.unary(BRACKETS, a -> a, operands);
 
             } else if (UNARY_MINUS.equals(operator)) {
 
-                return Operand.unary(UNARY_MINUS, a -> a--, exprs.toArray(new Operand[0]));
+                return Operand.unary(UNARY_MINUS, a -> a--, operands);
 
             }
             return Operand.empty();
@@ -73,12 +74,13 @@ public class OperandDecoder implements Decoder {
 
             final JsonNode val = node.get(VAL);
             final String value = val.asText();
+            return Operand.number(Double.parseDouble(value));
 
-            if (isDouble(value)) {
-                return Operand.number(Double.parseDouble(value));
-            } else {
-                return Operand.variable(value);
-            }
+        } else if (node.has(VAR)) {
+
+            final JsonNode var = node.get(VAR);
+            final String value = var.asText();
+            return Operand.variable(value);
 
         }
         return Operand.empty();

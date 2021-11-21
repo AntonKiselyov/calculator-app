@@ -5,112 +5,53 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
-public interface Expr extends Operand {
+public abstract class Expr implements Operand {
 
-    static Expr minus(final Operand leftOp, final Operand rightOp) {
-        return new MinusExpr(leftOp, rightOp);
+    public static Expr binary(final String symbol, final Operand left, final Operand right) {
+        return new BinaryExpr(symbol, left, right);
     }
 
-    static Expr plus(final Operand leftOp, final Operand rightOp) {
-        return new PlusExpr(leftOp, rightOp);
+    public static Expr unary(final String symbol, final Operand operand) {
+        return new UnaryExpr(symbol, operand);
     }
 
-    static Expr multiply(final Operand leftOp, final Operand rightOp) {
-        return new MulExpr(leftOp, rightOp);
+    public static Operand number(final double val) {
+        return new Number(val);
     }
 
-    static Expr division(final Operand leftOp, final Operand rightOp) {
-        return new DivExpr(leftOp, rightOp);
+    public static Operand variable(final String var) {
+        return new Variable(var);
     }
 
-    static Expr brackets(final Operand operand) {
-        return new BracketsExpr(operand);
-    }
-
-    static Expr unaryMinus(final Operand operand) {
-        return new UnaryMinusExpr(operand);
-    }
-
-    static Operand number(final double parseDouble) {
-        return new Number(parseDouble);
-    }
-
-    static Operand variable(final String val) {
-        return new Variable(val);
-    }
-
-    static Operand empty() {
+    public static Operand empty() {
         return new Empty();
     }
-}
 
-@ResourceRepresentation
-class BinaryExpr implements Expr {
-    @JsonProperty("val")
-    protected final String val;
+    @JsonProperty("symbol")
+    protected final String symbol;
     @JsonProperty("args")
     protected final List<Operand> args;
 
     @JsonCreator
-    public BinaryExpr(final String val,
+    protected Expr(final String symbol,
+                   final List<Operand> args) {
+        this.symbol = symbol;
+        this.args = args;
+    }
+}
+
+@ResourceRepresentation
+class BinaryExpr extends Expr {
+    public BinaryExpr(final String symbol,
                       final Operand arg1,
                       final Operand arg2) {
-        this.val = val;
-        this.args = List.of(arg1, arg2);
+        super(symbol, List.of(arg1, arg2));
     }
 }
 
 @ResourceRepresentation
-class PlusExpr extends BinaryExpr {
-    public PlusExpr(final Operand arg1, final Operand arg2) {
-        super("+", arg1, arg2);
-    }
-}
-
-@ResourceRepresentation
-class MinusExpr extends BinaryExpr {
-    public MinusExpr(final Operand arg1, final Operand arg2) {
-        super("-", arg1, arg2);
-    }
-}
-
-@ResourceRepresentation
-class DivExpr extends BinaryExpr {
-    public DivExpr(final Operand arg1, final Operand arg2) {
-        super("/", arg1, arg2);
-    }
-}
-
-@ResourceRepresentation
-class MulExpr extends BinaryExpr {
-    public MulExpr(final Operand arg1, final Operand arg2) {
-        super("*", arg1, arg2);
-    }
-}
-
-@ResourceRepresentation
-class UnaryExpr implements Expr {
-    @JsonProperty("val")
-    protected final String val;
-    @JsonProperty("args")
-    protected final List<Operand> args;
-
-    public UnaryExpr(final String val, final Operand arg) {
-        this.val = val;
-        this.args = List.of(arg);
-    }
-}
-
-@ResourceRepresentation
-class BracketsExpr extends UnaryExpr {
-    public BracketsExpr(final Operand arg) {
-        super("()", arg);
-    }
-}
-
-@ResourceRepresentation
-class UnaryMinusExpr extends UnaryExpr {
-    public UnaryMinusExpr(final Operand arg) {
-        super("--", arg);
+class UnaryExpr extends Expr {
+    public UnaryExpr(final String symbol, final Operand arg) {
+        super(symbol, List.of(arg));
     }
 }

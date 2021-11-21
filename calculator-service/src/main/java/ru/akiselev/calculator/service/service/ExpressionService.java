@@ -36,35 +36,35 @@ public class ExpressionService {
 
             final Operand leftOp = parse(node.getChild(0));
             final Operand rightOp = parse(node.getChild(2));
-            return Expr.minus(leftOp, rightOp);
+            return Expr.binary("-", leftOp, rightOp);
 
         } else if (node instanceof PlusContext) {
 
             final Operand leftOp = parse(node.getChild(0));
             final Operand rightOp = parse(node.getChild(2));
-            return Expr.plus(leftOp, rightOp);
+            return Expr.binary("+", leftOp, rightOp);
 
         } else if (node instanceof MultiplyContext) {
 
             final Operand leftOp = parse(node.getChild(0));
             final Operand rightOp = parse(node.getChild(2));
-            return Expr.multiply(leftOp, rightOp);
+            return Expr.binary("*", leftOp, rightOp);
 
         } else if (node instanceof DivisionContext) {
 
             final Operand leftOp = parse(node.getChild(0));
             final Operand rightOp = parse(node.getChild(2));
-            return Expr.division(leftOp, rightOp);
+            return Expr.binary("/", leftOp, rightOp);
 
         } else if (node instanceof BracketsContext) {
 
             final Operand operand = parse(node.getChild(1));
-            return Expr.brackets(operand);
+            return Expr.unary("()", operand);
 
         } else if (node instanceof UnaryMinusContext) {
 
             final Operand operand = parse(node.getChild(0));
-            return Expr.unaryMinus(operand);
+            return Expr.unary("--", operand);
 
         } else if (node instanceof OperandContext) {
 

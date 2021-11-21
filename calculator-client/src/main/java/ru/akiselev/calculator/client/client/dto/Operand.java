@@ -1,10 +1,9 @@
 package ru.akiselev.calculator.client.client.dto;
 
 import com.google.common.base.Preconditions;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.function.BinaryOperator;
 import java.util.function.UnaryOperator;
 
@@ -14,11 +13,11 @@ public interface Operand {
 
     double evaluate();
 
-    static Operand binary(final String symbol, final BinaryOperator<Double> operator, final Operand ...args) {
+    static Operand binary(final String symbol, final BinaryOperator<Double> operator, final List<Operand> args) {
         return new BinaryExpr(symbol, operator, args);
     }
 
-    static Operand unary(final String symbol, final UnaryOperator<Double> operator, final Operand ...args) {
+    static Operand unary(final String symbol, final UnaryOperator<Double> operator, final List<Operand> args) {
         return new UnaryExpr(symbol, operator, args);
     }
 
@@ -37,28 +36,21 @@ public interface Operand {
     class Variable implements Operand {
 
         @Getter
-        private final String val;
-        private Double substitute;
+        private final String var;
 
-        public Variable(final String val) {
-            this.val = val;
+        public Variable(final String var) {
+            this.var = var;
         }
 
         @Override
         public double evaluate() {
-            Preconditions.checkNotNull(substitute, "Substitute can't be null.");
-            return substitute;
-        }
-
-        public void applySubstitute(final double param) {
-            this.substitute = param;
+            throw new RuntimeException("Variable can't be evaluated.");
         }
 
         @Override
         public String toString() {
             return "Variable{" +
-                    "val='" + val + '\'' +
-                    ", param=" + substitute +
+                    "var='" + var + '\'' +
                     '}';
         }
     }
@@ -84,21 +76,35 @@ public interface Operand {
         }
     }
 
-    interface Expr extends Operand {
+    abstract class Expr implements Operand {
 
-        String symbol();
+        protected final String symbol;
+        protected final List<Operand> args;
 
-        Operand[] args();
+        protected Expr(final String symbol, final List<Operand> args) {
+            this.symbol = symbol;
+            this.args = args;
+        }
 
-        int numberOfArgs();
+        public abstract String symbol();
+
+        public abstract List<Operand> args();
+
+        protected abstract int numberOfArgs();
+
     }
 
-    @AllArgsConstructor
-    class BinaryExpr implements Expr {
+    class BinaryExpr extends Expr {
 
-        private final String symbol;
+        @Getter
         private final BinaryOperator<Double> operator;
-        private final Operand[] args;
+
+        public BinaryExpr(final String symbol,
+                          final BinaryOperator<Double> operator,
+                          final List<Operand> args) {
+            super(symbol, args);
+            this.operator = operator;
+        }
 
         @Override
         public String symbol() {
@@ -106,15 +112,15 @@ public interface Operand {
         }
 
         @Override
-        public Operand[] args() {
+        public List<Operand> args() {
             return args;
         }
 
         @Override
         public double evaluate() {
             Preconditions.checkNotNull(args, "Args cannot be null!");
-            Preconditions.checkState(numberOfArgs() == args.length, "Number of arguments should be equal to " + numberOfArgs() + ".");
-            return operator.apply(args[0].evaluate(), args[1].evaluate());
+            Preconditions.checkState(numberOfArgs() == args.size(), "Number of arguments should be equal to " + numberOfArgs() + ".");
+            return operator.apply(args.get(0).evaluate(), args.get(1).evaluate());
         }
 
         @Override
@@ -125,18 +131,23 @@ public interface Operand {
         @Override
         public String toString() {
             return "BinaryExpr{" +
-                    "val='" + symbol + '\'' +
-                    ", args=" + Arrays.toString(args) +
+                    "symbol='" + symbol + '\'' +
+                    ", args=" + args +
                     '}';
         }
     }
 
-    @AllArgsConstructor
-    class UnaryExpr implements Expr {
+    class UnaryExpr extends Expr {
 
-        private final String symbol;
+        @Getter
         private final UnaryOperator<Double> operator;
-        private final Operand[] args;
+
+        public UnaryExpr(final String symbol,
+                         final UnaryOperator<Double> operator,
+                         final List<Operand> args) {
+            super(symbol, args);
+            this.operator = operator;
+        }
 
         @Override
         public String symbol() {
@@ -144,15 +155,15 @@ public interface Operand {
         }
 
         @Override
-        public Operand[] args() {
+        public List<Operand> args() {
             return args;
         }
 
         @Override
         public double evaluate() {
             Preconditions.checkNotNull(args, "Args cannot be null!");
-            Preconditions.checkState(numberOfArgs() == args.length, format("Number of arguments should be equal to %d.", numberOfArgs()));
-            return operator.apply(args[0].evaluate());
+            Preconditions.checkState(numberOfArgs() == args.size(), format("Number of arguments should be equal to %d.", numberOfArgs()));
+            return operator.apply(args.get(0).evaluate());
         }
 
         @Override
@@ -163,8 +174,8 @@ public interface Operand {
         @Override
         public String toString() {
             return "UnaryExpr{" +
-                    "val='" + symbol + '\'' +
-                    ", args=" + Arrays.toString(args) +
+                    "symbol='" + symbol + '\'' +
+                    ", args=" + args +
                     '}';
         }
     }
