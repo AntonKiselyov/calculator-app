@@ -43,33 +43,15 @@ public class OperandDecoder implements Decoder {
             });
 
             final String operator = val.asText();
-            if (PLUS.equals(operator)) {
-
-                return Operand.binary(PLUS, (a, b) -> a + b, operands);
-
-            } else if (MINUS.equals(operator)) {
-
-                return Operand.binary(MINUS, (a, b) -> a - b, operands);
-
-            } else if (MUL.equals(operator)) {
-
-                return Operand.binary(MUL, (a, b) -> a * b, operands);
-
-            } else if (DIV.equals(operator)) {
-
-                return Operand.binary(DIV, (a, b) -> a / b, operands);
-
-            } else if (BRACKETS.equals(operator)) {
-
-                return Operand.unary(BRACKETS, a -> a, operands);
-
-            } else if (UNARY_MINUS.equals(operator)) {
-
-                return Operand.unary(UNARY_MINUS, a -> a--, operands);
-
-            }
-            return Operand.empty();
-
+            return switch (operator) {
+                case PLUS -> Operand.binary(PLUS, (a, b) -> a + b, operands);
+                case MINUS -> Operand.binary(MINUS, (a, b) -> a - b, operands);
+                case MUL -> Operand.binary(MUL, (a, b) -> a * b, operands);
+                case DIV -> Operand.binary(DIV, (a, b) -> a / b, operands);
+                case BRACKETS -> Operand.unary(BRACKETS, a -> a, operands);
+                case UNARY_MINUS -> Operand.unary(UNARY_MINUS, a -> a--, operands);
+                default -> Operand.empty();
+            };
         } else if (node.has(VAL)) {
 
             final JsonNode val = node.get(VAL);

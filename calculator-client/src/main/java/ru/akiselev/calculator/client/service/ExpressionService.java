@@ -34,33 +34,33 @@ public class ExpressionService {
         Preconditions.checkNotNull(params, "Parameters can't be null.");
         Preconditions.checkNotNull(operand, "Expression can't be null");
 
-        if (operand instanceof Operand.Expr) {
-            final Operand.Expr expr = (Operand.Expr) operand;
+        switch (operand) {
+            case Operand.Expr expr -> {
+                final List<Operand> args = expr.args()
+                        .stream()
+                        .map(arg -> substituteVariables(arg, params))
+                        .collect(Collectors.toList());
+                switch (expr) {
+                    case Operand.BinaryExpr binaryExpr:
 
-            final List<Operand> args = expr.args()
-                    .stream()
-                    .map(arg -> substituteVariables(arg, params))
-                    .collect(Collectors.toList());
+                        return Operand.binary(binaryExpr.symbol(), binaryExpr.getOperator(), args);
 
-            if (expr instanceof Operand.BinaryExpr) {
+                    case Operand.UnaryExpr unaryExpr:
 
-                final Operand.BinaryExpr binaryExpr = (Operand.BinaryExpr) expr;
-                return Operand.binary(binaryExpr.symbol(), binaryExpr.getOperator(), args);
+                        return Operand.unary(unaryExpr.symbol(), unaryExpr.getOperator(), args);
 
-            } else if (expr instanceof Operand.UnaryExpr) {
-
-                final Operand.UnaryExpr unaryExpr = (Operand.UnaryExpr) expr;
-                return Operand.unary(unaryExpr.symbol(), unaryExpr.getOperator(), args);
-
+                    default:
+                        break;
+                }
             }
-        } else if (operand instanceof Operand.Variable) {
-
-            final Operand.Variable variable = (Operand.Variable) operand;
-            if (params.containsKey(variable.getVar())) {
-                return Operand.number(params.get(variable.getVar()));
+            case Operand.Variable variable -> {
+                if (params.containsKey(variable.getVar())) {
+                    return Operand.number(params.get(variable.getVar()));
+                }
+                return operand;
             }
-            return operand;
-
+            default -> {
+            }
         }
         return operand;
     }

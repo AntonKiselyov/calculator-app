@@ -32,51 +32,61 @@ public class ExpressionService {
 
     private Operand parse(final ParseTree node) {
         Preconditions.checkNotNull(node);
-        if (node instanceof MinusContext) {
+        switch (node) {
+            case MinusContext minusContext -> {
 
-            final Operand leftOp = parse(node.getChild(0));
-            final Operand rightOp = parse(node.getChild(2));
-            return Expr.binary("-", leftOp, rightOp);
+                final Operand leftOp = parse(minusContext.getChild(0));
+                final Operand rightOp = parse(minusContext.getChild(2));
+                return Expr.binary("-", leftOp, rightOp);
 
-        } else if (node instanceof PlusContext) {
-
-            final Operand leftOp = parse(node.getChild(0));
-            final Operand rightOp = parse(node.getChild(2));
-            return Expr.binary("+", leftOp, rightOp);
-
-        } else if (node instanceof MultiplyContext) {
-
-            final Operand leftOp = parse(node.getChild(0));
-            final Operand rightOp = parse(node.getChild(2));
-            return Expr.binary("*", leftOp, rightOp);
-
-        } else if (node instanceof DivisionContext) {
-
-            final Operand leftOp = parse(node.getChild(0));
-            final Operand rightOp = parse(node.getChild(2));
-            return Expr.binary("/", leftOp, rightOp);
-
-        } else if (node instanceof BracketsContext) {
-
-            final Operand operand = parse(node.getChild(1));
-            return Expr.unary("()", operand);
-
-        } else if (node instanceof UnaryMinusContext) {
-
-            final Operand operand = parse(node.getChild(0));
-            return Expr.unary("--", operand);
-
-        } else if (node instanceof OperandContext) {
-
-            final String val = node.getChild(0).toString();
-            final Operand operand;
-            if (isNumeric(val)) {
-                operand = Expr.number(Double.parseDouble(val));
-            } else {
-                operand = Expr.variable(val);
             }
-            return operand;
+            case PlusContext plusContext -> {
+
+                final Operand leftOp = parse(plusContext.getChild(0));
+                final Operand rightOp = parse(plusContext.getChild(2));
+                return Expr.binary("+", leftOp, rightOp);
+
+            }
+            case MultiplyContext multiplyContext -> {
+
+                final Operand leftOp = parse(multiplyContext.getChild(0));
+                final Operand rightOp = parse(multiplyContext.getChild(2));
+                return Expr.binary("*", leftOp, rightOp);
+
+            }
+            case DivisionContext divisionContext -> {
+
+                final Operand leftOp = parse(divisionContext.getChild(0));
+                final Operand rightOp = parse(divisionContext.getChild(2));
+                return Expr.binary("/", leftOp, rightOp);
+
+            }
+            case BracketsContext bracketsContext -> {
+
+                final Operand operand = parse(bracketsContext.getChild(1));
+                return Expr.unary("()", operand);
+
+            }
+            case UnaryMinusContext unaryMinusContext -> {
+
+                final Operand operand = parse(unaryMinusContext.getChild(0));
+                return Expr.unary("--", operand);
+
+            }
+            case OperandContext operandContext -> {
+
+                final String val = operandContext.getChild(0).toString();
+                final Operand operand;
+                if (isNumeric(val)) {
+                    operand = Expr.number(Double.parseDouble(val));
+                } else {
+                    operand = Expr.variable(val);
+                }
+                return operand;
+            }
+            default -> {
+                return Expr.empty();
+            }
         }
-        return Expr.empty();
     }
 }
