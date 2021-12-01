@@ -7,11 +7,9 @@ import feign.jaxrs.JAXRSContract;
 
 public class CalculatorServiceApiBuilder {
 
-    static final String HOST = "http://localhost:8080";
-
-    public static <T> T build(final Class<T> clazz) {
+    public static <T> T build(final Class<T> clazz, final String url) {
         return builder()
-                .target(clazz, HOST);
+                .target(clazz, url);
     }
 
     private static Feign.Builder builder() {

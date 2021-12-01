@@ -16,3 +16,20 @@ dependencies {
     implementation group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: javaxRsApiVersion
     implementation group: 'commons-io', name: 'commons-io', version: commonsIOVersion
 }
+
+jib {
+    from {
+        image = 'openjdk:17'
+    }
+    to {
+        image = 'localhost:5000/calculator-client'
+        tags = ['latest']
+    }
+    container {
+        mainClass = 'ru.akiselev.calculator.client.CalculatorClientApp'
+        ports = ['8090', '8091']
+        allowInsecureRegistries = true
+        jvmFlags = ['--enable-preview']
+        args = ['server', 'application.yml']
+    }
+}

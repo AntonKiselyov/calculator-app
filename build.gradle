@@ -1,3 +1,7 @@
+plugins {
+    id 'com.google.cloud.tools.jib' version '3.1.4' apply(false)
+}
+
 allprojects {
     group 'ru.akiselev'
     version '1.0-SNAPSHOT'
@@ -6,6 +10,7 @@ allprojects {
 subprojects {
     apply plugin: 'java'
     apply plugin: 'idea'
+    apply plugin: 'com.google.cloud.tools.jib'
 
     repositories {
         mavenCentral()

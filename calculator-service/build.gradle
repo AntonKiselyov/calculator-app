@@ -10,3 +10,20 @@ dependencies {
 }
 
 compileJava.dependsOn(generateGrammarSource)
+
+jib {
+    from {
+        image = 'openjdk:17'
+    }
+    to {
+        image = 'localhost:5000/calculator-service'
+        tags = ['latest']
+    }
+    container {
+        mainClass = 'ru.akiselev.calculator.service.CalculatorServiceApp'
+        ports = ['8080', '8081']
+        allowInsecureRegistries = true
+        jvmFlags = ['--enable-preview']
+        args = ['server', 'application.yml']
+    }
+}

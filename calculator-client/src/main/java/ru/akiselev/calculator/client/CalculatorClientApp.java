@@ -1,7 +1,9 @@
 package ru.akiselev.calculator.client;
 
 import io.dropwizard.Application;
+import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.ResourceConfigurationSourceProvider;
+import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import ru.akiselev.calculator.client.healthcheck.AppHealthCheck;
@@ -30,5 +32,9 @@ public class CalculatorClientApp extends Application<CalculatorClientConfigurati
                         .modules(new CalculatorClientModule())
                 .build());
         bootstrap.setConfigurationSourceProvider(new ResourceConfigurationSourceProvider());
+        bootstrap.setConfigurationSourceProvider(new SubstitutingSourceProvider(
+                bootstrap.getConfigurationSourceProvider(),
+                new EnvironmentVariableSubstitutor(true))
+        );
     }
 }
